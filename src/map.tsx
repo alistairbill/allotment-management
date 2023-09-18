@@ -1,48 +1,57 @@
 import { useEffect, useState } from 'preact/hooks'
-import baptist from './mapdata';
+import baptist, { plotNames, PlotId, isPlotId } from './mapdata';
 import { ref, onValue, update } from 'firebase/database';
 import { database } from './firebase';
+import { JSX } from 'preact';
 
-type Plots = Record<string, { owner: string, notes: string }>;
+type HolderInfo = Record<PlotId, { owner: string, notes: string }>;
 
 export default function Map() {
-  const [plots, setPlots] = useState<Plots>({});
-  const [selectedId, setSelectedId] = useState("");
-  const [selectedName, setSelectedName] = useState("");
+  const [holderInfo, setHolderInfo] = useState({} as HolderInfo);
+  const [selectedId, setSelectedId] = useState<PlotId | null>(null);
   const [owner, setOwner] = useState("");
   const [notes, setNotes] = useState("");
 
-  const setSelectedPlot = (id: string, name: string) => {
-    setSelectedId(id);
-    setSelectedName(name);
-    setOwner(id in plots && "owner" in plots[id] ? plots[id].owner : "");
-    setNotes(id in plots && "notes" in plots[id] ? plots[id].notes : "");
+  const handleClick = ({ currentTarget }: JSX.TargetedEvent<SVGPathElement, Event>) => {
+    const id = currentTarget.id;
+    if (isPlotId(id)) {
+      setSelectedId(id);
+      setOwner(id in holderInfo && "owner" in holderInfo[id] ? holderInfo[id].owner : "");
+      setNotes(id in holderInfo && "notes" in holderInfo[id] ? holderInfo[id].notes : "");
+    }
   }
 
   useEffect(() => onValue(ref(database, "plots"), (snapshot) => {
     if (snapshot.exists()) {
-      setPlots(snapshot.val());
+      setHolderInfo(snapshot.val());
     }
   }), []);
 
-  const updateOwner = () => update(ref(database), { [`plots/${selectedId}/owner`]: owner });
-  const updateNotes = () => update(ref(database), { [`plots/${selectedId}/notes`]: notes });
+  const handleChangeOwner = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+    setOwner(currentTarget.value);
+  };
+  const handleChangeNotes = ({ currentTarget }: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
+    setNotes(currentTarget.value);
+  };
+
+  const commitOwner = () => update(ref(database), { [`plots/${selectedId}/owner`]: owner });
+  const commitNotes = () => update(ref(database), { [`plots/${selectedId}/notes`]: notes });
 
   return (
     <div class="grid grid-cols-1 xl:grid-cols-3 bg-white dark:bg-black">
-      {selectedId === "" ? null :
+      {selectedId === null ? null :
         <div class="p-6">
-          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Plot {selectedName}</h5>
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Plot {plotNames[selectedId]}</h5>
           <div className="mb-4">
             <label for="owner" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Plot holder</label>
             <input id="owner" type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={owner} onChange={(e) => setOwner(e.currentTarget.value)} onBlur={updateOwner} />
+              value={owner} onChange={handleChangeOwner} onBlur={commitOwner} />
           </div>
           <div className="mb-4">
             <label for="notes" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes</label>
             <textarea id="notes" rows={4} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Notes"
-              value={notes} onChange={(e) => setNotes(e.currentTarget.value)} onBlur={updateNotes} />
+              value={notes} onChange={handleChangeNotes} onBlur={commitNotes} />
           </div>
         </div>}
       <div className="col-span-2 p-4">
@@ -52,9 +61,9 @@ export default function Map() {
               <path
                 className={location.id === selectedId ? "stroke-white dark:stroke-black stroke-2 fill-blue-500 hover:fill-blue-700" : "stroke-white dark:stroke-black stroke-2 fill-gray-400 hover:fill-gray-500"}
                 cursor="pointer"
-                name={location.name}
+                id={location.id}
                 d={location.path}
-                onClick={() => setSelectedPlot(location.id, location.name)} />
+                onClick={handleClick} />
               <text x={location.x} y={location.y} className="text-xl fill-white" pointer-events="none">{location.name}</text>
             </g>)
           })}

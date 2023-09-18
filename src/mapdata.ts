@@ -1,12 +1,4 @@
-interface Location {
-  id: string;
-  name: string;
-  path: string;
-  x: number;
-  y: number;
-}
-
-export default [
+const data = [
   { name: '1', id: 'plot-1', path: 'm 378.2,695.5 -17.3,-73.2 130.3,12.6 1.1,35.9 z', x: 410, y: 665 },
   { name: '2', id: 'plot-2', path: 'm 361.1,622.1 -5.1,-48.4 133.4,16.6 1.5,43.9 z', x: 410, y: 612 },
   { name: '3', id: 'plot-3', path: 'm 355.8,573.5 -8.9,-38.6 141.8,18.2 0.9,36.8 z', x: 410, y: 570 },
@@ -78,4 +70,14 @@ export default [
   { name: '34a', id: 'plot-34a', path: 'm 727.3,658.7 -4.7,-29.4 -100.1,3.5 1.1,29.1 z', x: 645, y: 653 },
   { name: '35', id: 'plot-35', path: 'm 509.9,695.9 123.4,3.7 -1.0,-38.2 -123.8,4.1 z', x: 555, y: 688 },
   { name: '35a', id: 'plot-35a', path: 'm 735.7,703.8 -8.4,-45.1 -95.0,2.8 1.0,38.0 z', x: 660, y: 690 },
-] as Location[];
+] as const;
+export default data;
+
+type Location = (typeof data)[number];
+export type PlotId = Location["id"];
+
+export const plotNames = data.reduce((acc, { name, id }) => ({ ...acc, [id]: name }), {} as Record<PlotId, string>);
+
+export function isPlotId(id: string): id is PlotId {
+  return id in plotNames;
+}

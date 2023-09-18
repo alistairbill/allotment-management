@@ -1,9 +1,9 @@
 import { useState } from 'preact/hooks';
 
-interface LoginProps {
+type LoginProps = {
     login: (email: string, password: string) => Promise<void>;
     error: string;
-}
+};
 
 export default function Login(props: LoginProps) {
     const [email, setEmail] = useState("");
