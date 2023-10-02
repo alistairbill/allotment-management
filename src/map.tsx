@@ -65,14 +65,14 @@ export default function Map() {
               value={owner} onChange={handleChangeOwner} onBlur={commitOwner} />
           </div>
           <div className="mb-4">
-            <label for="associates" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Associates</label>
-            <input id="associates" type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={associates} onChange={handleChangeAssociates} onBlur={commitAssociates} />
-          </div>
-          <div className="mb-4">
             <label for="startDate" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date started</label>
             <input id="startDate" type="date" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               value={startDate} onChange={handleChangeStartDate} onBlur={commitStartDate} />
+          </div>
+          <div className="mb-4">
+            <label for="associates" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Associates</label>
+            <input id="associates" type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={associates} onChange={handleChangeAssociates} onBlur={commitAssociates} />
           </div>
           <div className="mb-4">
             <label for="notes" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes</label>
