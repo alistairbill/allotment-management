@@ -4,12 +4,19 @@ import { ref, onValue, update } from 'firebase/database';
 import { database } from './firebase';
 import { JSX } from 'preact';
 
-type HolderInfo = Record<PlotId, { owner: string, notes: string }>;
+type HolderInfo = Record<PlotId, {
+  owner: string,
+  associates: string,
+  startDate: string,
+  notes: string,
+}>;
 
 export default function Map() {
   const [holderInfo, setHolderInfo] = useState({} as HolderInfo);
   const [selectedId, setSelectedId] = useState<PlotId | null>(null);
   const [owner, setOwner] = useState("");
+  const [associates, setAssociates] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [notes, setNotes] = useState("");
 
   const handleClick = ({ currentTarget }: JSX.TargetedEvent<SVGPathElement, Event>) => {
@@ -17,6 +24,8 @@ export default function Map() {
     if (isPlotId(id)) {
       setSelectedId(id);
       setOwner(id in holderInfo && "owner" in holderInfo[id] ? holderInfo[id].owner : "");
+      setAssociates(id in holderInfo && "associates" in holderInfo[id] ? holderInfo[id].associates : "");
+      setStartDate(id in holderInfo && "startDate" in holderInfo[id] ? holderInfo[id].startDate : "");
       setNotes(id in holderInfo && "notes" in holderInfo[id] ? holderInfo[id].notes : "");
     }
   }
@@ -30,17 +39,25 @@ export default function Map() {
   const handleChangeOwner = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
     setOwner(currentTarget.value);
   };
+  const handleChangeAssociates = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+    setAssociates(currentTarget.value);
+  };
+  const handleChangeStartDate = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+    setStartDate(currentTarget.value);
+  };
   const handleChangeNotes = ({ currentTarget }: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
     setNotes(currentTarget.value);
   };
 
   const commitOwner = () => update(ref(database), { [`plots/${selectedId}/owner`]: owner });
+  const commitAssociates = () => update(ref(database), { [`plots/${selectedId}/associates`]: associates });
+  const commitStartDate = () => update(ref(database), { [`plots/${selectedId}/startDate`]: startDate });
   const commitNotes = () => update(ref(database), { [`plots/${selectedId}/notes`]: notes });
 
   return (
-    <div class="grid grid-cols-1 xl:grid-cols-3 bg-white dark:bg-black">
+    <div className="grid grid-cols-1 xl:grid-cols-3 bg-white dark:bg-black">
       {selectedId === null ? null :
-        <div class="p-6">
+        <form className="p-6">
           <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Plot {plotNames[selectedId]}</h5>
           <div className="mb-4">
             <label for="owner" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Plot holder</label>
@@ -48,12 +65,22 @@ export default function Map() {
               value={owner} onChange={handleChangeOwner} onBlur={commitOwner} />
           </div>
           <div className="mb-4">
+            <label for="associates" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Associates</label>
+            <input id="associates" type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={associates} onChange={handleChangeAssociates} onBlur={commitAssociates} />
+          </div>
+          <div className="mb-4">
+            <label for="startDate" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date started</label>
+            <input id="startDate" type="date" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={startDate} onChange={handleChangeStartDate} onBlur={commitStartDate} />
+          </div>
+          <div className="mb-4">
             <label for="notes" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes</label>
             <textarea id="notes" rows={4} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Notes"
               value={notes} onChange={handleChangeNotes} onBlur={commitNotes} />
           </div>
-        </div>}
+        </form>}
       <div className="col-span-2 p-4">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720">
           {baptist.map((location) => {
