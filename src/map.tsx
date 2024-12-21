@@ -9,6 +9,7 @@ type HolderInfo = Record<PlotId, {
   associates: string,
   startDate: string,
   notes: string,
+  url: string,
 }>;
 
 export default function Map() {
@@ -18,6 +19,7 @@ export default function Map() {
   const [associates, setAssociates] = useState("");
   const [startDate, setStartDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [url, setUrl] = useState("");
 
   const handleClick = ({ currentTarget }: JSX.TargetedEvent<SVGPathElement, Event>) => {
     const id = currentTarget.id;
@@ -27,6 +29,7 @@ export default function Map() {
       setAssociates(id in holderInfo && "associates" in holderInfo[id] ? holderInfo[id].associates : "");
       setStartDate(id in holderInfo && "startDate" in holderInfo[id] ? holderInfo[id].startDate : "");
       setNotes(id in holderInfo && "notes" in holderInfo[id] ? holderInfo[id].notes : "");
+      setUrl(id in holderInfo && "url" in holderInfo[id] ? holderInfo[id].url : "");
     }
   }
 
@@ -48,11 +51,15 @@ export default function Map() {
   const handleChangeNotes = ({ currentTarget }: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
     setNotes(currentTarget.value);
   };
+  const handleChangeUrl = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+    setUrl(currentTarget.value);
+  };
 
   const commitOwner = () => update(ref(database), { [`plots/${selectedId}/owner`]: owner });
   const commitAssociates = () => update(ref(database), { [`plots/${selectedId}/associates`]: associates });
   const commitStartDate = () => update(ref(database), { [`plots/${selectedId}/startDate`]: startDate });
   const commitNotes = () => update(ref(database), { [`plots/${selectedId}/notes`]: notes });
+  const commitUrl = () => update(ref(database), { [`plots/${selectedId}/url`]: url });
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 bg-white dark:bg-black">
@@ -68,6 +75,16 @@ export default function Map() {
             <label for="startDate" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date started</label>
             <input id="startDate" type="date" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               value={startDate} onChange={handleChangeStartDate} onBlur={commitStartDate} />
+          </div>
+          <div className="mb-4">
+            <label for="url" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Trello URL</label>
+            <div className="flex items-center gap-2">
+              <input id="url" type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                value={url} onChange={handleChangeUrl} onBlur={commitUrl} />
+              <a href={url} target="_blank">
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap">Open</button>
+              </a>
+            </div>
           </div>
           <div className="mb-4">
             <label for="associates" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Associates</label>
